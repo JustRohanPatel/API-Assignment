@@ -6,79 +6,79 @@
 //
 import SwiftUI
 
-struct ContentView: View {
-    @State private var competitions = [Competition]()
-    @State private var showingAlert = false
+struct ContentView: View { //defines a Swift struct
+    @State private var competitions = [Competition]() //create var
+    @State private var showingAlert = false //dosent spam the alert button
 
-    var body: some View {
-        NavigationView {
+    var body: some View { //defines the body of a view
+        NavigationView { //enables navigation between views
             List(competitions, id: \.id) { competition in
-                NavigationLink(destination: CompetitionDetailView(competition: competition)) {
-                    Text(competition.name)
+                NavigationLink(destination: CompetitionDetailView(competition: competition)) { // sends code to below struct to detail it
+                    Text(competition.name)//displays the name of a competition as a text label
                 }
             }
-            .navigationTitle("Football Competitions")
+            .navigationTitle("Football Competitions") //shows the title
         }
-        .task {
+        .task { //loading data from an API
             await loadData()
         }
-        .alert(isPresented: $showingAlert) {
-            Alert(title: Text("Loading Error"), message: Text("There was an error loading the football competitions. Please try again later."))
+        .alert(isPresented: $showingAlert) { //when code dosent work the alert opotion
+            Alert(title: Text("Loading Error"), message: Text("There was an error loading the football competitions. Please try again later."))// show the writing
         }
     }
 
-    func loadData() async {
-        let query = "https://api.football-data.org/v4/competitions"
-        guard let url = URL(string: query) else { return }
+    func loadData() async { //finds data
+        let query = "https://api.football-data.org/v4/competitions" // the link to the API
+        guard let url = URL(string: query) else { return }  //checks if query is a valid URL
 
         do {
-            let (data, _) = try await URLSession.shared.data(from: url)
-            let decodedResponse = try JSONDecoder().decode(Competitions.self, from: data)
+            let (data, _) = try await URLSession.shared.data(from: url)//fetches data from a URL
+            let decodedResponse = try JSONDecoder().decode(Competitions.self, from: data)//decodes JSON data into a Swift object
             DispatchQueue.main.async {
-                competitions = decodedResponse.competitions
+                competitions = decodedResponse.competitions //updates the competitions variable
             }
         } catch {
-            DispatchQueue.main.async {
+            DispatchQueue.main.async {//updating the UI if alert wrong
                 showingAlert = true
             }
         }
     }
 }
 
-struct CompetitionDetailView: View {
-    var competition: Competition
+struct CompetitionDetailView: View { //displays details about a Competition
+    var competition: Competition//declares a stored property
 
-    var body: some View {
+    var body: some View { //defines the body of a view
         VStack {
-            Text(competition.name).font(.title).padding()
-            Text("Area").font(.caption)
-            Text(competition.area.name)
-            if let url = competition.emblem, let imageUrl = URL(string: url) {
-                AsyncImage(url: imageUrl)
+            Text(competition.name).font(.title).padding() // displays the property
+            Text("Area").font(.caption)//show where the place is
+            Text(competition.area.name)//displays the name of the area
+            if let url = competition.emblem, let imageUrl = URL(string: url) { // loads message
+                AsyncImage(url: imageUrl) //displays an image
                     .padding()
             }
-            Spacer()
+            Spacer()//put space
         }
-        .navigationTitle(competition.name)
+        .navigationTitle(competition.name) //sets the navigation bar title
     }
 }
 
-#Preview {
+#Preview { //makes canvas
     ContentView()
 }
 
-struct Area: Codable {
-    var name: String
-    var flag: String?
+struct Area: Codable { //defines a Swift struct
+    var name: String//  declares a stored property n
+    var flag: String?//declares an optional stored property
 }
 
-struct Competition: Identifiable, Codable {
-    var id: Int
-    var name: String
-    var emblem: String?
-    var area: Area
+struct Competition: Identifiable, Codable {//defines a Competition struct
+    var id: Int// declares a stored property named id
+    var name: String//declares a stored property
+    var emblem: String?//declares an optional stored property
+    var area: Area//declares a stored property
 }
 
-struct Competitions: Codable {
-    var competitions: [Competition]
+struct Competitions: Codable {// defines a struct
+    var competitions: [Competition] //declares a stored propert
 }
